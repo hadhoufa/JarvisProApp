@@ -2,30 +2,14 @@ name: Build APK
 on: [push]
 jobs:
   build:
-    # Use Ubuntu 20.04 as it's the only one supporting legacy libraries Buildozer needs
-    runs-on: ubuntu-20.04 
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # 1. Install Java and dependencies directly (avoids broken PPA)
-      - name: Setup dependencies
+      
+      - name: Build with Docker
         run: |
-          sudo apt update
-          sudo apt install -y openjdk-17-jdk python3-pip git zip unzip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-
-      # 2. Install Buildozer and Cython
-      - name: Install Buildozer
-        run: |
-          pip3 install --user --upgrade buildozer Cython virtualenv
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      # 3. Build with Buildozer (force accepting licenses)
-      - name: Build with Buildozer
-        run: |
-          export APP_ANDROID_ACCEPT_SDK_LICENSE=1
-          mkdir -p .buildozer
-          buildozer android debug
-
+          docker run --rm -v "$PWD":/app -w /app kivy/buildozer:latest buildozer android debug
+          
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
