@@ -1,4 +1,4 @@
-name: Advanced Build & Release
+name: Jarvis Android Build & Release
 
 on:
   push:
@@ -10,19 +10,22 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: jarvis-android-build
+  cancel-in-progress: true
+
 jobs:
   test-code:
+    name: Critical code checks
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install linter
+      - name: Install flake8
         run: python -m pip install --upgrade pip flake8
 
       - name: Run critical lint checks
@@ -34,13 +37,13 @@ jobs:
             --statistics
 
   build-android:
+    name: Build Android APK
     needs: test-code
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
+      - name: Build APK
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
@@ -53,16 +56,28 @@ jobs:
           name: kivy-apk-artifact
           path: bin/*.apk
           if-no-files-found: error
+          retention-days: 7
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.run_number }}-${{ github.sha }}
-          name: ${{ github.run_number }} - Jarvis Android Build
+          tag_name: jarvis-${{ github.run_number }}-${{ github.sha }}
+          name: Jarvis Android Build #${{ github.run_number }}
           body: |
             Automated Android build.
 
-            - Branch: ${{ github.ref_name }}
-            - Commit: ${{ github.sha }}
+            - Branch: `${{ github.ref_name }}`
+            - Commit: `${{ github.sha }}`
+            - Run: #${{ github.run_number }}
           files: bin/*.apk
           fail_on_unmatched_files: true
+
+      - name: Delete old automated releases
+        if: success()
+        uses: dev-drprasad/delete-older-releases@v0.3.4
+        with:
+          keep_latest: 5
+          delete_tags: true
+          delete_tag_pattern: jarvis-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
