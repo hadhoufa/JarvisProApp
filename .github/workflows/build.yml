@@ -2,7 +2,8 @@ name: Build APK
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    # Use Ubuntu 20.04 as it's the only one supporting legacy libraries Buildozer needs
+    runs-on: ubuntu-20.04 
     steps:
       - uses: actions/checkout@v4
 
@@ -18,10 +19,11 @@ jobs:
           pip3 install --user --upgrade buildozer Cython virtualenv
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      # 3. Build directly with Buildozer
+      # 3. Build with Buildozer (force accepting licenses)
       - name: Build with Buildozer
         run: |
           export APP_ANDROID_ACCEPT_SDK_LICENSE=1
+          mkdir -p .buildozer
           buildozer android debug
 
       - name: Upload APK
