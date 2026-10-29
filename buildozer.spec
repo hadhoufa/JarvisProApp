@@ -20,3 +20,4 @@ p4a.branch = develop
 
 [buildozer]
 log_level = 2
+android.skip_update = False
