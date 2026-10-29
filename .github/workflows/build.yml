@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  RELEASE_TAG: "v2026.10.29-1717"
+  RELEASE_TAG: "v2026.10.29-1721"
 
 jobs:
   # ==========================================
@@ -29,7 +29,7 @@ jobs:
   # ==========================================
   build-android:
     needs: test-code
-    runs-on: ubuntu-22.04 # تم التثبيت لتجنب مشاكل الإصدارات
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       
@@ -38,7 +38,7 @@ jobs:
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: master
+          buildozer_version: stable # ✅ إصلاح: استخدام الإصدار المستقر بدلاً من master
 
       - name: Upload Artifact (For immediate download)
         uses: actions/upload-artifact@v4
@@ -59,7 +59,6 @@ jobs:
   # ==========================================
   # 💻 Level 4: Build Windows (Optional/Future)
   # ==========================================
-  # (Commented out by default to save GitHub Actions minutes)
   # build-windows:
   #   runs-on: windows-latest
   #   steps:
