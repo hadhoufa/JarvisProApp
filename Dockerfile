@@ -1,15 +1,12 @@
 FROM ubuntu:22.04
 
-# Force debconf to never ask questions (The REAL Fix)
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install liberror-perl first with the non-interactive setting
-RUN apt-get update && apt-get install -y -q liberror-perl
+# Install liberror-perl first with inline non-interactive mode (The REAL Fix)
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -q liberror-perl
 
 # Install the rest of the dependencies
-RUN apt-get update && apt-get install -y -q --no-install-recommends \
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -q --no-install-recommends \
     python3 python3-pip python3-venv \
     openjdk-17-jdk \
     build-essential git zip unzip \
