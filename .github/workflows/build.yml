@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build with Buildozer
-        uses: digreatbrian/buildozer-action@v1
+        uses: digreatbrian/buildozer-action@v2
         id: buildozer
         with:
           command: buildozer android debug
