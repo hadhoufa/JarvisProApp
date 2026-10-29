@@ -1,46 +1,18 @@
-name: Advanced Build & Release
-on: 
-  push:
-    branches: [ main, master ]
-
+name: Build APK
+on: [push]
 jobs:
-  # 🛡️ Level 3: Automated Testing (Linting)
-  test-code:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install flake8
-      # فحص الكود من الأخطاء القاتلة فقط
-      - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || echo "⚠️ Warnings found, but continuing."
-
-  # 📱 Level 2 & 4: Build Android (Docker - No Manual Fixes)
-  build-android:
-    needs: test-code
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Build APK with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
+      - name: Build with Buildozer
+        uses: digreatbrian/buildozer-action@v2
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: master
-
-      - name: Upload Artifact
+          buildozer_version: stable
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: kivy-apk-artifact
+          name: kivy-apk
           path: bin/*.apk
-
-      # 🏆 Level 2: Create GitHub Release
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v2026.10.29-1636
-          name: Release v2026.10.29-1636
-          files: bin/*.apk
-          token: ${{ secrets.GITHUB_TOKEN }}
