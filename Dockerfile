@@ -1,14 +1,12 @@
 FROM ubuntu:22.04
-RUN rm -f /etc/resolv.conf && echo "nameserver 8.8.8.8" > /etc/resolv.conf
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Prevent systemd/resolv.conf issues
-RUN rm -f /etc/resolv.conf && echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv \
     openjdk-17-jdk \
-    build-essential git zip unzip \
+    build-essential git zip unzip --no-install-recommends \
     lib32stdc++6 lib32z1 lib32ncurses6 \
     libltdl-dev autoconf automake libtool pkg-config \
     zlib1g-dev libncurses5-dev libncursesw5-dev \
