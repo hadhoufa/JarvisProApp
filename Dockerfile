@@ -1,7 +1,11 @@
 FROM ubuntu:22.04
+
+# Force debconf to never ask questions (The REAL Fix)
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install the problematic package separately first (prevents EOFError)
+# Install liberror-perl first with the non-interactive setting
 RUN apt-get update && apt-get install -y -q liberror-perl
 
 # Install the rest of the dependencies
