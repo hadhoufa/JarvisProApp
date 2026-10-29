@@ -1,8 +1,10 @@
 FROM kivy/buildozer:latest
 
-# Force non-interactive mode for apt and pip (The REAL Fix)
+# Force non-interactive mode for apt, pip, and debconf (The ULTIMATE Fix)
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_NO_INPUT=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
 # Ensure git is installed (non-interactively)
 RUN apt-get update && apt-get install -y -q --no-install-recommends git && rm -rf /var/lib/apt/lists/*
@@ -10,5 +12,5 @@ RUN apt-get update && apt-get install -y -q --no-install-recommends git && rm -r
 WORKDIR /app
 COPY . /app
 
-# Run buildozer (it will now run in non-interactive mode)
+# Run buildozer
 CMD ["buildozer", "android", "debug"]
