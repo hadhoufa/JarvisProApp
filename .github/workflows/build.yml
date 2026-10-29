@@ -1,22 +1,16 @@
-name: Final Docker Build
-on:
-  push:
-    branches: [ main, master ]
-  workflow_dispatch:
+name: Build APK
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Build APK with Docker (Host Network)
-        run: |
-          docker build --network=host -t jarvis-builder .
-          docker run --rm --network=host -v "$PWD":/app jarvis-builder
-      - name: Fix Permissions for Upload
-        run: |
-          sudo chmod -R 777 bin/ 2>/dev/null || true
+      - uses: actions/checkout@v3
+      - name: Build with Buildozer
+        uses: digreatbrian/buildozer-action@v1
+        with:
+          command: buildozer android debug
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: kivy-apk
           path: bin/*.apk
