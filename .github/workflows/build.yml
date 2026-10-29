@@ -7,12 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build with Docker
+      - name: Build with Custom Docker
         run: |
+          docker build -t my-buildozer .
           docker run --rm \
             -e BUILDOZER_WARN_ON_ROOT=0 \
             -e APP_ANDROID_ACCEPT_SDK_LICENSE=1 \
-            -v "$PWD":/app -w /app kivy/buildozer:latest \
+            -v "$PWD":/app -w /app my-buildozer \
             buildozer android debug
       - name: Upload APK
         uses: actions/upload-artifact@v4
