@@ -1,5 +1,9 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
+
+# Prevent systemd/resolv.conf issues
+RUN rm -f /etc/resolv.conf && echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv \
     openjdk-17-jdk \
@@ -9,8 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zlib1g-dev libncurses5-dev libncursesw5-dev \
     cmake libffi-dev libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+
 RUN pip3 install --upgrade pip==23.3.2
 RUN pip3 install cython==0.29.34 buildozer
+
 WORKDIR /app
 COPY . /app
+
 CMD ["buildozer", "android", "debug"]
