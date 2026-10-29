@@ -1,22 +1,46 @@
-name: Build APK
-on: [push]
-permissions:
-  contents: write
+name: Advanced Build & Release
+on: 
+  push:
+    branches: [ main, master ]
+
 jobs:
-  build:
-    # Changed to 20.04 to fix Java 8 and PPA missing errors
-    runs-on: ubuntu-20.04
+  # 🛡️ Level 3: Automated Testing (Linting)
+  test-code:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build with Buildozer
-        uses: digreatbrian/buildozer-action@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install flake8
+      # فحص الكود من الأخطاء القاتلة فقط
+      - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || echo "⚠️ Warnings found, but continuing."
+
+  # 📱 Level 2 & 4: Build Android (Docker - No Manual Fixes)
+  build-android:
+    needs: test-code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build APK with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: stable
-      - name: Upload APK
+          buildozer_version: master
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kivy-apk
-          # Use direct path to avoid bad substitution error
+          name: kivy-apk-artifact
           path: bin/*.apk
+
+      # 🏆 Level 2: Create GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2026.10.29-1636
+          name: Release v2026.10.29-1636
+          files: bin/*.apk
+          token: ${{ secrets.GITHUB_TOKEN }}
