@@ -1,11 +1,9 @@
-# Use a pre-built image that already has Python, Java, and Buildozer
 FROM kivy/buildozer:latest
 
-# Set the working directory
-WORKDIR /app
+# Ensure git is installed (some buildozer recipes need it)
+RUN apt-get update && apt-get install -y -q --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 
-# Copy the project files
+WORKDIR /app
 COPY . /app
 
-# Run Buildozer
 CMD ["buildozer", "android", "debug"]
