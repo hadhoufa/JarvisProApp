@@ -1,7 +1,11 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install the problematic package separately first (prevents EOFError)
+RUN apt-get update && apt-get install -y -q liberror-perl
+
+# Install the rest of the dependencies
+RUN apt-get update && apt-get install -y -q --no-install-recommends \
     python3 python3-pip python3-venv \
     openjdk-17-jdk \
     build-essential git zip unzip \
