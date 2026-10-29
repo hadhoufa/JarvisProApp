@@ -1,8 +1,6 @@
 FROM ubuntu:22.04
-
 ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv \
     openjdk-17-jdk \
     build-essential git zip unzip \
@@ -11,11 +9,8 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev libncurses5-dev libncursesw5-dev \
     cmake libffi-dev libssl-dev \
     && rm -rf /var/lib/apt/lists/*
-
 RUN pip3 install --upgrade pip==23.3.2
 RUN pip3 install cython==0.29.34 buildozer
-
 WORKDIR /app
 COPY . /app
-
 CMD ["buildozer", "android", "debug"]
