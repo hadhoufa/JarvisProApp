@@ -1,4 +1,4 @@
-name: Docker Stable Build
+name: Final Docker Build
 on:
   push:
     branches: [ main, master ]
@@ -8,10 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build APK with Docker
+      - name: Build APK with Docker (Host Network)
         run: |
-          docker build -t jarvis-builder .
-          docker run --rm -v "$PWD":/app jarvis-builder
+          docker build --network=host -t jarvis-builder .
+          docker run --rm --network=host -v "$PWD":/app jarvis-builder
+      - name: Fix Permissions for Upload
+        run: |
+          sudo chmod -R 777 bin/ 2>/dev/null || true
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
