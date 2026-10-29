@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env:
-  RELEASE_TAG: "v2026.10.29-1721"
+  RELEASE_TAG: "v2026.10.29-1726"
 
 jobs:
   # ==========================================
@@ -33,12 +33,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      # ✅ الحل النهائي: تثبيت Java 17 يدوياً لتجاوز مستودع PPA المعطوب
+      - name: Install Java 17 (Workaround for PPA error)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk
+          
       - name: Build APK with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: stable # ✅ إصلاح: استخدام الإصدار المستقر بدلاً من master
+          buildozer_version: stable
 
       - name: Upload Artifact (For immediate download)
         uses: actions/upload-artifact@v4
@@ -56,12 +62,3 @@ jobs:
           files: bin/*.apk
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  # ==========================================
-  # 💻 Level 4: Build Windows (Optional/Future)
-  # ==========================================
-  # build-windows:
-  #   runs-on: windows-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Build Windows EXE
-  #       run: echo "Add PyInstaller or Windows build steps here..."
