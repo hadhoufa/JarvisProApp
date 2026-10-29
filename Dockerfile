@@ -1,4 +1,5 @@
 FROM ubuntu:22.04
+RUN rm -f /etc/resolv.conf && echo "nameserver 8.8.8.8" > /etc/resolv.conf
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Prevent systemd/resolv.conf issues
