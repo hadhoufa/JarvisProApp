@@ -1,5 +1,5 @@
 name: Build APK
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
   build-android:
@@ -7,17 +7,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        with:
-          command: buildozer android debug
-          buildozer_version: stable
+      - name: Build APK with Docker
+        run: |
+          docker run --rm -i -v "${{ github.workspace }}":/app -w /app \
+            -e BUILDOZER_WARN_ON_ROOT=0 \
+            -e APP_ANDROID_ACCEPT_SDK_LICENSE=1 \
+            kivy/buildozer:latest bash -c "
+              sudo rm -f /etc/apt/sources.list.d/openjdk-r-ppa*.list
+              sudo apt-get update || true
+              sudo apt-get install -y openjdk-17-jdk
+              buildozer android debug
+            "
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
