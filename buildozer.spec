@@ -7,7 +7,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 1.0.0
 # THE REAL FIX: Force hostpython3 to match the server's version
-requirements = python3, kivy==2.3.1, kivymd, pillow
+requirements = python3,kivy==2.3.1,kivymd,pillow
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET

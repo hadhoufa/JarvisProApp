@@ -1,0 +1,41 @@
+#!/bin/bash
+cd ~/JarvisProApp || exit 1
+
+cat > .github/workflows/build.yml << 'YAML'
+name: Build APK
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip unzip
+
+      - name: Build APK with Docker
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/app -w /app \
+            --entrypoint /bin/bash \
+            -e BUILDOZER_WARN_ON_ROOT=0 \
+            -e APP_ANDROID_ACCEPT_SDK_LICENSE=1 \
+            kivy/buildozer:latest -c "
+              sudo apt-get update
+              sudo apt-get install -y openjdk-17-jdk
+              buildozer android debug
+            "
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kivy-apk
+          path: bin/*.apk
+YAML
+
+git add .github/workflows/build.yml
+git commit -m "Fix: Bypass broken action, use official Docker"
+git push origin main -f
+echo "✅ Done! Check GitHub Actions tab."
