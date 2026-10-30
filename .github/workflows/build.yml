@@ -1,31 +1,34 @@
 name: Build APK
-on: [push, workflow_dispatch]
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  build-android:
+    name: Build APK with Docker
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip unzip
+    - name: Build with Buildozer
+      run: |
+        docker run --rm -v "${{ github.workspace }}":/home/user/hostcwd \
+          -v "$HOME/.buildozer":/home/user/.buildozer \
+          -e BUILDOZER_WARN_ON_ROOT=0 \
+          -e APP_ANDROID_ACCEPT_SDK_LICENSE=1 \
+          kivy/buildozer:latest \
+          bash -c "sudo apt-get update && \
+                   sudo apt-get install -y openjdk-17-jdk-headless && \
+                   sudo rm -rf /var/lib/apt/lists/* && \
+                   buildozer android debug"
 
-      - name: Build APK with Docker
-        run: |
-          docker run --rm -v "${{ github.workspace }}":/app -w /app \
-            --entrypoint /bin/bash \
-            -e BUILDOZER_WARN_ON_ROOT=0 \
-            -e APP_ANDROID_ACCEPT_SDK_LICENSE=1 \
-            kivy/buildozer:latest -c "
-              sudo apt-get update
-              sudo apt-get install -y openjdk-17-jdk
-              buildozer android debug
-            "
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kivy-apk
-          path: bin/*.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: kivy-apk
+        path: bin/*.apk
