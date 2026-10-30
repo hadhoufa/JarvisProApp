@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -12,15 +12,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y zip unzip
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: stable
+      - name: Build APK with Docker
+        run: |
+          docker run --rm -v "${{ github.workspace }}":/app -w /app \
+            --entrypoint /bin/bash \
+            -e BUILDOZER_WARN_ON_ROOT=0 \
+            -e APP_ANDROID_ACCEPT_SDK_LICENSE=1 \
+            kivy/buildozer:latest -c "
+              sudo apt-get update
+              sudo apt-get install -y openjdk-17-jdk
+              buildozer android debug
+            "
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: kivy-apk
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: bin/*.apk
